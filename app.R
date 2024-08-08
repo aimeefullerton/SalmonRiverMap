@@ -45,12 +45,24 @@ server <- function(input, output, session) {
       points2plot <- points
     }
 
+    streams5$NmLbl <- streams5$GNIS_NAME
+    unique(streams5$NmLbl)
+    streams5$NmLbl[!streams5$COMID %in% c(23449281, 23478471, 23518761, 23551114)] <- NA
+    lbl <- streams5[!is.na(streams5$NmLbl),]
+    lbl$NmLbl[2:4] <- gsub( " River", "", lbl$NmLbl[2:4])
+    lbl$NmLbl[lbl$NmLbl == "Salmon"] <- "East Fork Salmon"
+    
     # Map
-    par(mar = c(0,0,0,1), oma = c(1,1,1,7), cex = 1.3)
     mf_theme(bg = "white", tab = TRUE, mar = c(0,0,0,0), pos = "left")
-    mf_map(salmon_bdry, col = "#d8d7d2", border = NA) #"#d4dfe2"
-    mf_map(streams, col = "#689ba7", lwd = 1, add = T)
+    mf_map(streams, col = "#689ba7", lwd = 1)
+    mf_map(salmon_bdry, col = "#d8d7d2", border = NA, add = T) #"#d4dfe2"
     mf_map(streams5, col = "#20839b", lwd = rivers$StreamOrde/4, add = T)
+    mf_map(streams, col = "#689ba7", lwd = 0.5, add = T)
+    mf_label(lbl[1,], "NmLbl", overlap = F, lines = T, col = "#20839b",cex = 01.1, adj = c(0.2, 2), family = "serif", font = 3)
+    mf_label(lbl[4,], "NmLbl", overlap = F, halo = T, bg = "#d8d7d2", col = "#20839b", lines = T, cex = 0.9, adj = c(0.3, -1), srt = 48, family = "serif", font = 3)
+    mf_label(lbl[3,], "NmLbl", overlap = F, halo = T, bg = "#d8d7d2", col = "#20839b", lines = T, cex = 0.9, adj = c(0.5, -4), srt = 35, family = "serif", font = 3)
+    mf_label(lbl[2,], "NmLbl", overlap = F, halo = T, bg = "#d8d7d2", col = "#20839b", lines = T, cex = 0.9, adj = c(-0.1, -2), srt = 55, family = "serif", font = 3)
+
     clr <- rep("grey10",length(points2plot$Lbl)); clr[which(points2plot$Lbl %in% lbls)] <- "#ac330d"
     clr2 <- rep("white",length(points2plot$Lbl)); clr2[which(points2plot$Lbl %in% lbls)] <- "#fccd04"
     if(sel.sites.only == T & length(sites.sel) > 0){
@@ -58,6 +70,8 @@ server <- function(input, output, session) {
       clr2 <- rep("white",length(points2plot$Lbl))
     }
     mf_label(points2plot, "Lbl", col = clr, halo = T, bg = clr2, overlap = F, q = 3, lines = F, cex = 0.7)
+    
+    # LISA WOULD LIKE A SECTION OF STREAM HIGHLIGHTED IN ADDITION TO THE LABEL POINT
  
     # Add inset map 
     mf_inset_on(x = "worldmap", pos = "bottomleft", cex = 0.3)
