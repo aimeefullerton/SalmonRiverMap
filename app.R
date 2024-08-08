@@ -16,9 +16,15 @@ ui <- fluidPage(
                  checkboxGroupInput(inputId = "sites", label = "Sites:",
                       choices = points$Stream,
                       selected = NA),
-                 checkboxInput(inputId = "only",label = "Show only selected sites", 
+                 checkboxInput(inputId = "only", label = "Show only selected sites", 
                       value = F),
-                  downloadButton('savePlot1', "Save figure")
+                 checkboxInput(inputId = "shwnm", label = "Display site names", 
+                      value = F),
+                 checkboxInput(inputId = "inset", label = "Display inset map", 
+                      value = F),
+                 checkboxInput(inputId = "streams", label = "Label streams", 
+                      value = F),
+                 downloadButton('savePlot1', "Save figure")
                ), #end sidebarPanel
                mainPanel(
                  plotOutput("Plot1", height = "700px")
@@ -44,6 +50,9 @@ server <- function(input, output, session) {
     } else {
       points2plot <- points
     }
+    show.names <- updateSource()$shwnm
+    show.inset <- updateSource()$inset
+    show.streams <- updateSource()$streams
 
     streams5$NmLbl <- streams5$GNIS_NAME
     unique(streams5$NmLbl)
@@ -58,39 +67,50 @@ server <- function(input, output, session) {
     mf_map(salmon_bdry, col = "#d8d7d2", border = NA, add = T) #"#d4dfe2"
     mf_map(streams5, col = "#20839b", lwd = rivers$StreamOrde/4, add = T)
     mf_map(streams, col = "#689ba7", lwd = 0.5, add = T)
+    
+    # add stream name labels
+    if(show.streams == T){
     mf_label(lbl[1,], "NmLbl", overlap = F, lines = T, col = "#20839b",cex = 01.1, adj = c(0.2, 2), family = "serif", font = 3)
-    mf_label(lbl[4,], "NmLbl", overlap = F, halo = T, bg = "#d8d7d2", col = "#20839b", lines = T, cex = 0.9, adj = c(0.3, -1), srt = 48, family = "serif", font = 3)
-    mf_label(lbl[3,], "NmLbl", overlap = F, halo = T, bg = "#d8d7d2", col = "#20839b", lines = T, cex = 0.9, adj = c(0.5, -4), srt = 35, family = "serif", font = 3)
-    mf_label(lbl[2,], "NmLbl", overlap = F, halo = T, bg = "#d8d7d2", col = "#20839b", lines = T, cex = 0.9, adj = c(-0.1, -2), srt = 55, family = "serif", font = 3)
-
+    mf_label(lbl[4,], "NmLbl", overlap = F, halo = T, bg = "#d8d7d2", col = "#20839b", lines = T, cex = 1, adj = c(0.3, -1), srt = 48, family = "serif", font = 3)
+    mf_label(lbl[3,], "NmLbl", overlap = F, halo = T, bg = "#d8d7d2", col = "#20839b", lines = T, cex = 1, adj = c(0.5, -4), srt = 35, family = "serif", font = 3)
+    mf_label(lbl[2,], "NmLbl", overlap = F, halo = T, bg = "#d8d7d2", col = "#20839b", lines = T, cex = 1, adj = c(-0.1, -2), srt = 55, family = "serif", font = 3)
+    }
+    
+    # Add sites
     clr <- rep("grey10",length(points2plot$Lbl)); clr[which(points2plot$Lbl %in% lbls)] <- "#ac330d"
     clr2 <- rep("white",length(points2plot$Lbl)); clr2[which(points2plot$Lbl %in% lbls)] <- "#fccd04"
     if(sel.sites.only == T & length(sites.sel) > 0){
       clr <- rep("grey10",length(points2plot$Lbl))
       clr2 <- rep("white",length(points2plot$Lbl))
     }
-    mf_label(points2plot, "Lbl", col = clr, halo = T, bg = clr2, overlap = F, q = 3, lines = F, cex = 0.7)
-    
     # LISA WOULD LIKE A SECTION OF STREAM HIGHLIGHTED IN ADDITION TO THE LABEL POINT
- 
-    # Add inset map 
-    mf_inset_on(x = "worldmap", pos = "bottomleft", cex = 0.3)
-    mf_map(crb, col = "gray90", border = 0)
-    mf_map(pnw, col = NA, border = "white", add = T)
-    mf_map(salmon_bdry, col = "gray60", border = NA, add = T)
-    mf_label(pnw, "Lbl", col = "black", overlap = T, q = 3)
-    mf_map(st_zm(rivers7), col = "gray40", add = T)
-    mf_inset_off()
+    #working: mf_map(streams[streams$COMID %in% points2plot$COMID,], col = "#fccd04", lwd = 4, add = T)
+    #p2p_adj <- points2plot
+    #p2p_adj$Lat <- p2p_adj$Lat + 0.2; p2p_adj$Lon <- p2p_adj$Lon + 0.2
+    mf_label(points2plot, "Lbl", col = clr, halo = T, bg = clr2, overlap = F, q = 3, lines = F, cex = 0.9)
+    #mf_map(points2plot, pch = 19, add = T, col = clr, cex = 0.7)
     
     # Add cartographic details
     mf_arrow("bottomleft")
     mf_scale(pos = "bottom", cex = 1.2)
     
+    # Add inset map 
+    if(show.inset == T){
+    mf_inset_on(x = "worldmap", pos = "bottomleft", cex = 0.3)
+    mf_map(crb, col = "gray90", border = 0)
+    mf_map(pnw, col = NA, border = "white", add = T)
+    mf_map(salmon_bdry, col = "gray60", border = NA, add = T)
+    mf_label(pnw, "Lbl", col = "black", overlap = T, q = 3)
+    mf_map(st_zm(rivers7), col = "gray40", lwd = 2, add = T)
+    mf_inset_off()
+    }
+    
     # Add legend
-    par(mar = c(0, 5, 0, 1), oma = c(1, 1, 1, 7), new = T)
-    legend("topright", legend = paste0(points2plot$Lbl, ": ", points2plot$Stream), pch = NA, bty = 'n', 
-           xjust = 0, yjust = 0, xpd = T)
-
+    if(show.names == T){
+      par(mar = c(0, 5, 0, 1), oma = c(1, 1, 1, 7), new = T)
+      legend("topright", legend = paste0(points2plot$Lbl, ": ", points2plot$Stream), pch = NA, bty = 'n', 
+             xjust = 0, yjust = 0, xpd = T)
+    }
     recordPlot()
   })
   
