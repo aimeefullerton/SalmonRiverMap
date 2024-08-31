@@ -1,5 +1,5 @@
 # Shiny App to display temperature time series for Salmon River basin salmon subbasins
-# AH Fullerton, last updated 5/25/24
+# AH Fullerton, last updated 8/31/24
 
 library(shiny)
 library(sf)
@@ -16,6 +16,7 @@ ui <- fluidPage(
                  checkboxGroupInput(inputId = "sites", label = "Sites:",
                       choices = points$Stream,
                       selected = NA),
+                 hr(),
                  checkboxInput(inputId = "only", label = "Show only selected sites", 
                       value = F),
                  checkboxInput(inputId = "shwnm", label = "Display site names", 
