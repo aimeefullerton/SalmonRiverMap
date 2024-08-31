@@ -1,5 +1,5 @@
 # Shiny App to display temperature time series for Salmon River basin salmon subbasins
-# AH Fullerton, last updated 5/25/24
+# AH Fullerton, last updated 8/31/24
 
 library(shiny)
 library(sf)
@@ -16,6 +16,7 @@ ui <- fluidPage(
                  checkboxGroupInput(inputId = "sites", label = "Sites:",
                       choices = points$Stream,
                       selected = NA),
+                 hr(),
                  checkboxInput(inputId = "only", label = "Show only selected sites", 
                       value = F),
                  checkboxInput(inputId = "shwnm", label = "Display site names", 
@@ -50,6 +51,7 @@ server <- function(input, output, session) {
     } else {
       points2plot <- points
     }
+    points2plot$dot <- "."
     show.names <- updateSource()$shwnm
     show.inset <- updateSource()$inset
     show.streams <- updateSource()$streams
@@ -83,13 +85,11 @@ server <- function(input, output, session) {
       clr <- rep("grey10",length(points2plot$Lbl))
       clr2 <- rep("white",length(points2plot$Lbl))
     }
-    # LISA WOULD LIKE A SECTION OF STREAM HIGHLIGHTED IN ADDITION TO THE LABEL POINT
     #working: mf_map(streams[streams$COMID %in% points2plot$COMID,], col = "#fccd04", lwd = 4, add = T)
-    #p2p_adj <- points2plot
-    #p2p_adj$Lat <- p2p_adj$Lat + 0.2; p2p_adj$Lon <- p2p_adj$Lon + 0.2
-    mf_label(points2plot, "Lbl", col = clr, halo = T, bg = clr2, overlap = F, q = 3, lines = F, cex = 0.9)
-    #mf_map(points2plot, pch = 19, add = T, col = clr, cex = 0.7)
-    
+    #mf_map(points2plot, pch = 1, add = T, cex = 2.7)
+    mf_label(points2plot, "Lbl", col = clr, halo = T, bg = clr2, overlap = F, q = 3, lines = F, cex = 1.05)
+    mf_label(points2plot, "Lbl", col = clr, halo = T, bg = clr2, overlap = F, q = 3, lines = F, cex = 1.05)
+
     # Add cartographic details
     mf_arrow("bottomleft")
     mf_scale(pos = "bottom", cex = 1.2)
