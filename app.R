@@ -65,7 +65,7 @@ server <- function(input, output, session) {
     mf_theme(bg = "white", tab = TRUE, mar = c(0,0,0,0), pos = "left")
     mf_map(streams, col = "#689ba7", lwd = 1)
     mf_map(salmon_bdry, col = "#d8d7d2", border = NA, add = T) #"#d4dfe2"
-    mf_map(streams5, col = "#20839b", lwd = rivers$StreamOrde/4, add = T)
+    mf_map(streams5, col = "#20839b", lwd = round(rivers$StreamOrde/4), add = T)
     mf_map(streams, col = "#689ba7", lwd = 0.5, add = T)
     
     # add stream name labels
